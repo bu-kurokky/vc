@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イケボテスト</title>
+  <script src='./Tone.js'></script>
+  <style>body{padding:32px}*{list-style:none}</style>
+</head>
+<body>
+<button onclick="checkMic(this)">Mic(OFF)</button>
+<ul>
+  <li><input type="range" id="reverb" name="reverb" min="0.1" value="0.1" step="0.5" max="2.1"  oninput="changeReverb(this.value)" onchange="changeReverb(this.value)"><label for="reverb">残響音</label></li
+  <li><input type="range" id="pitch" name="pitch" min="0" max="2" value="0" step="1" oninput="changePitch(this.value)"  onchange="changePitch(this.value)"><label for="pitch">声を低くする</label></li>
+</ul>
+</body>
+<script>
+const mic = new Tone.UserMedia()
+let isFirstime = true
+mic.open()
+mic.mute = true
+
+const vol = new Tone.Volume(10)
+const pan = new Tone.Panner(1)
+const reverb = new Tone.Reverb()
+const pitchShift = new Tone.PitchShift({pitch:0,windowSize:0.05,channelCount:0,wet:1})
+
+function changePitch(arg){
+  pitchShift.pitch = 0 - arg
+  document.getElementById("pitch").value = arg
+}
+
+function changeReverb(arg){
+  reverb.decay = arg
+  document.getElementById("reverb").value = arg
+}
+
+function checkMic(arg){
+  arg.textContent = mic.mute? "Mic(ON!)": "Mic(OFF)"
+  if(!mic.mute){
+    mic.mute = true
+    return
+  }
+  mic.mute = false
+  pitchShift.pitch = (0 - parseInt(document.getElementById("pitch").value))
+  reverb.decay = document.getElementById("reverb").value
+
+  if (!isFirstime){
+    return
+  }
+  pan.toDestination()
+  const eq = new Tone.EQ3(7,5,-10).toDestination()
+  pitchShift.connect(pan).toDestination()
+  reverb.connect(pan).toDestination()
+  const delay = new Tone.FeedbackDelay({channelCount:0,delayTime:0.15, feedback:0.1}).connect(pan).toDestination()
+  
+  mic.chain(vol, pitchShift, eq, reverb, delay)
+  isFirstime = false
+}
+
+</script>
+</html>

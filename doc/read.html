@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イケボテスト</title>
+  <script src="./SpeechSynthesisRecorder.js"></script>
+  <script src='./Tone.js'></script>
+  <style>body{padding:32px}*{list-style:none}</style>
+</head>
+<body>
+<button onclick="checkMic(this)">Mic(OFF)</button>
+<button onclick="conv()">conv</button>
+<ul>
+  <li><input type="range" id="reverb" name="reverb" min="0.1" value="0.1" step="0.5" max="2.1"  oninput="changeReverb(this.value)" onchange="changeReverb(this.value)"><label for="reverb">残響音</label></li
+  <li><input type="range" id="pitch" name="pitch" min="0" max="2" value="0" step="1" oninput="changePitch(this.value)"  onchange="changePitch(this.value)"><label for="pitch">声を低くする</label></li>
+</ul>
+<textarea id="hoge">
+あいうえお
+</textarea>
+一般的に、テキストから音声を再生する技術のことを「Text to Speech」略して「TTS」と言います。
+
+</body>
+
+
+
+<script>
+const voices = window.speechSynthesis.getVoices();
+let binary_url = false
+
+
+function conv(){
+  
+  console.log(binary_url)
+  if(!binary_url){
+    return
+  }
+  const player = new Tone.Player();
+  const pitchShift = new Tone.PitchShift({pitch: 2});
+  player.load(binary_url)
+  pitchShift.toMaster();
+  player.connect(pitchShift);
+  player.autostart = true;
+  
+}
+
+
+function checkMic(arg){
+  const speech_text = document.getElementById("hoge").value//読み上げる文章
+  let ttsRecorder = new SpeechSynthesisRecorder({
+      text: speech_text, 
+      utteranceOptions: {
+        voice: voices[7],
+        lang: "ja-JP",
+        pitch: .75,
+        rate: 1,
+        volume: 1
+      }
+  });
+  
+ttsRecorder.start().then((tts, data) =>{
+  console.log(data)
+  console.log(tts)
+}).then(({tts, data}) => {
+  console.log(tts)
+  console.log(data)
+})
+/*
+  .then(tts => tts.blob()).catch(err => console.log(err))
+  .then(({tts, data}) => {
+    // `data` : `Blob`
+    console.log(data)
+    tts.audioNode.src = URL.createObjectURL(data);
+    tts.audioNode.title = tts.utterance.text;
+    tts.audioNode.onloadedmetadata = () => {
+      console.log(tts.audioNode.duration);
+      tts.audioNode.play();
+    }
+  }).catch(err => console.log(err))
+*/
+/*
+ttsRecorder.start()
+  .then(tts => tts.readableStream())
+  .then(({tts, data}) => {
+    // `data` : `ReadableStream`
+    console.log(tts, data);
+    data.getReader().read().then(({value, done}) => {
+      tts.audioNode.src = URL.createObjectURL(value[0]);
+      binary_url = URL.createObjectURL(value[0])
+      tts.audioNode.title = tts.utterance.text;
+      tts.audioNode.onloadedmetadata = () => {
+        console.log(tts.audioNode.duration);
+        tts.audioNode.play();
+      }
+    })
+  })
+*/
+
+/*
+ttsRecorder.start()
+  .then(tts => tts.mediaSource())
+  .then(({tts, data}) => {
+    //console.log(tts, data);
+    // `data` : `MediaSource`
+    //tts.audioNode.srcObj = data;
+    //tts.audioNode.title = tts.utterance.text;
+    //const player = new Tone.Player(data).toDestination();
+    //player.autostart = true
+    
+    tts.audioNode.onloadedmetadata = () => {
+      //console.log(tts.audioNode.duration);
+      //tts.audioNode.play();
+      //const player = new Tone.Player(tts).toDestination();
+      //player.autostart = true
+    }
+    
+})
+*/
+  //const pitchShift = new Tone.PitchShift({pitch:-1,windowSize:0.1,channelCount:0,wet:1})
+  //ttsRecorder.start()
+/*
+  .then(({tts, data}) => {
+    data.connect(shifter)
+    shifter.toMaster()
+    // `data` : `MediaStream`
+    // do stuff with active `MediaStream`
+  })
+  .catch(err => console.log(err))
+*/
+
+}
+/*
+ttsRecorder.start()
+  .then(({tts, data}) => {
+    // `data` : `MediaStream`
+    // do stuff with active `MediaStream`
+    const effectedDest = Tone.context.createMediaStreamDestination()
+
+
+
+  })
+  .catch(err => console.log(err))
+*/
+
+//const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+//const recognition = new SpeechRecognition()
+/*
+const speech = new SpeechSynthesisUtterance(); 
+
+
+
+speech.text = document.getElementById("hoge").value//読み上げる文章
+console.log(speech.text)
+speech.voice = voices[7]
+speech.volume = 1.0; // 音量 min 0 ~ max 1
+speech.rate = 1.0; // 速度 min 0 ~ max 10
+speech.pitch = 1.0; // 音程 min 0 ~ max 2
+speech.lang = "ja-JP" //言語 
+//window.
+function checkMic(arg){
+  speechSynthesis.speak(speech)
+}
+*/
+//speech.rate = elem.rate; //速度 
+//speech.pitch = elem.pitch; //声の高さ 
+//speech.volume = elem.volume; //音量
+/*
+const mic = new Tone.UserMedia()
+let isFirstime = true
+mic.open()
+mic.mute = true
+
+const vol = new Tone.Volume(10)
+const pan = new Tone.Panner(1)
+const reverb = new Tone.Reverb()
+const pitchShift = new Tone.PitchShift({pitch:0,windowSize:0.05,channelCount:0,wet:1})
+
+function changePitch(arg){
+  pitchShift.pitch = 0 - arg
+  document.getElementById("pitch").value = arg
+}
+
+function changeReverb(arg){
+  reverb.decay = arg
+  document.getElementById("reverb").value = arg
+}
+
+function checkMic(arg){
+  arg.textContent = mic.mute? "Mic(ON!)": "Mic(OFF)"
+  if(!mic.mute){
+    mic.mute = true
+    return
+  }
+  mic.mute = false
+  pitchShift.pitch = (0 - parseInt(document.getElementById("pitch").value))
+  reverb.decay = document.getElementById("reverb").value
+
+  if (!isFirstime){
+    return
+  }
+  pan.toDestination()
+  const eq = new Tone.EQ3(7,5,-10).toDestination()
+  pitchShift.connect(pan).toDestination()
+  reverb.connect(pan).toDestination()
+  const delay = new Tone.FeedbackDelay({channelCount:0,delayTime:0.15, feedback:0.1}).connect(pan).toDestination()
+  
+  mic.chain(vol, pitchShift, eq, reverb, delay)
+  isFirstime = false
+}
+*/
+</script>
+</html>
