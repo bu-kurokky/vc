@@ -95,10 +95,34 @@ function playVoiceSound(){
 
 
 function playSignal(){
+
+/*
+var audioContext = new AudioContext();
+
+// OscillatorNodeを作成
+var oscillator = audioContext.createOscillator();
+oscillator.type = 'sine';
+oscillator.frequency.value = 440;
+
+// GainNodeを作成
+var gain = audioContext.createGain();
+gain.gain.value = 0.01;
+
+// 接続
+oscillator.connect(gain);
+gain.connect(audioContext.destination);
+
+// 再生
+oscillator.start(0);
+*/
+
+
+  const playBufferTime = 1.5 
+  const playEndTime = playBufferTime + 0.4
   const audioCtx = new AudioContext();
   const signal = audioCtx.createOscillator();
   signal.frequency.setValueAtTime(554.37, audioCtx.currentTime)
-  signal.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + 1.5 )
+  signal.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + playBufferTime )
   signal.type = 'sine'
 
   const gainNode = audioCtx.createGain()
@@ -106,22 +130,33 @@ function playSignal(){
   const tremloSetting = {rate:11, depth: 0.5}
   const tremoloValue = 1 - (tremloSetting.depth / 2)
   const tremoloAmplitude = tremloSetting.depth / 2
-  gainNode.gain.setValueAtTime(1 - tremoloAmplitude, audioCtx.currentTime);
-  gainNode.gain.setValueAtTime(tremoloValue, audioCtx.currentTime + 1 / tremloSetting.depth / 2);
+  gainNode.gain.setValueAtTime(1 - tremoloAmplitude, audioCtx.currentTime + playEndTime)
+  gainNode.gain.setValueAtTime(tremoloValue, (audioCtx.currentTime + 1 / tremloSetting.depth / 2) + playEndTime)
 
   const signalLfo = audioCtx.createOscillator()
   signalLfo.frequency.value = tremloSetting.rate
   signalLfo.type = 'square'
-  signalLfo.connect(gainNode.gain)
-  signalLfo.start()
+  gainNode.gain.value = 0.12
 
-  signal.connect(gainNode)
+  const tremoloGainNode = audioCtx.createGain()
+  tremoloGainNode.gain.value = 0.12
+
+  signalLfo.connect(tremoloGainNode)
+  tremoloGainNode.connect(gainNode.gain)
+
+  
+  signalLfo.start(0.5)
+  signalLfo.stop(audioCtx.currentTime + playEndTime)
+
+  gainNode.connect(tremoloGainNode)
   gainNode.connect(audioCtx.destination)
-
+  
+  signal.connect(gainNode)
   signal.start(0.5)
-  signal.stop(audioCtx.currentTime + 1.9)
+  signal.stop(audioCtx.currentTime + playEndTime)
 
   setTimeout(()  =>{ playVoiceSound() }, 2500)
+
 }
 
 
