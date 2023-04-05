@@ -54,6 +54,14 @@ let voiceCtx
 let start = false
 let voiceTimer
 
+function isiOS() {
+  if ( (/iPad|iPhone/.test(navigator.userAgent)) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
+    return true
+  }
+  return false
+}
+
+
 window.onload = function(){
   window.AudioContext = window.AudioContext || window.webkitAudioContext
   ctx = new AudioContext()
@@ -70,15 +78,22 @@ window.onload = function(){
 
 
 function playSemiSound(){
-  semiSound = ctx.createBufferSource();
+  semiSound = ctx.createBufferSource()
   semiSound.buffer = audioBuffer
   semiSound.playbackRate.value = 0.48
-  semiSound.loop = true
+  if(!isiOS()){
+    semiSound.loop = true
+  }
   const gainNode =  ctx.createGain()
   gainNode.gain.value = 0.08
   gainNode.connect(ctx.destination)
   semiSound.connect(gainNode)
   semiSound.start()
+  if(isiOS()){
+    semiSound.stop(ctx.currentTime + 5)
+    start = false
+  }
+
 }
 
 function playVoiceSound(){
@@ -90,33 +105,15 @@ function playVoiceSound(){
   gainNode.gain.value = 0.3
   gainNode.connect(voiceCtx.destination)
   voiceSound.connect(gainNode)
-  voiceSound.start(0)
+  if (!isiOS()){
+    voiceSound.start(0)
+  }else{
+    voiceSound.start(ctx.currentTime + 3)
+  }
 }
 
 
 function playSignal(){
-
-/*
-var audioContext = new AudioContext();
-
-// OscillatorNodeを作成
-var oscillator = audioContext.createOscillator();
-oscillator.type = 'sine';
-oscillator.frequency.value = 440;
-
-// GainNodeを作成
-var gain = audioContext.createGain();
-gain.gain.value = 0.01;
-
-// 接続
-oscillator.connect(gain);
-gain.connect(audioContext.destination);
-
-// 再生
-oscillator.start(0);
-*/
-
-
   const playBufferTime = 1.5 
   const playEndTime = playBufferTime + 0.4
   const audioCtx = new AudioContext();
@@ -152,11 +149,15 @@ oscillator.start(0);
   gainNode.connect(audioCtx.destination)
   
   signal.connect(gainNode)
-  signal.start(0.5)
+  if (!isiOS()){
+    signal.start(0.5)
+  }else{
+    signal.start(0.5)
+  }
   signal.stop(audioCtx.currentTime + playEndTime)
-
-  setTimeout(()  =>{ playVoiceSound() }, 2500)
-
+  if (!isiOS()){
+    setTimeout(()  =>{ playVoiceSound() }, 2500)
+  }
 }
 
 
@@ -177,14 +178,22 @@ function eyeAnimation() {
 function zetton(){
   eyeAnimation()
   if (start){
-    semiSound.stop()
+    if (!isiOS()){
+      semiSound.stop()
+      clearInterval(voiceTimer)
+    }
     start = false
-    clearInterval(voiceTimer)
     return
   }
   start = true
   playSemiSound()
-  voiceTimer = setInterval(() =>{playSignal()}, 3300)
+  if (!isiOS()){
+    voiceTimer = setInterval(() =>{playSignal()}, 3300)
+  }else{
+    playSemiSound()
+    playSignal()
+    playVoiceSound()
+  }
 }
 </script>
 </body>
