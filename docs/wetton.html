@@ -90,7 +90,7 @@ function playSemiSound(){
   semiSound.connect(gainNode)
   semiSound.start()
   if(isiOS()){
-    semiSound.stop(ctx.currentTime + 5)
+    semiSound.stop(ctx.currentTime + 4)
     start = false
   }
 
@@ -117,8 +117,8 @@ function playSignal(){
   const playBufferTime = 1.5 
   const playEndTime = playBufferTime + 0.4
   const audioCtx = new AudioContext();
-  const signal = audioCtx.createOscillator();
-  signal.frequency.setValueAtTime(554.37, audioCtx.currentTime)
+  const signal = audioCtx.createOscillator()
+  signal.frequency.setValueAtTime(554.37, audioCtx.currentTime )
   signal.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + playBufferTime )
   signal.type = 'sine'
 
@@ -140,20 +140,15 @@ function playSignal(){
 
   signalLfo.connect(tremoloGainNode)
   tremoloGainNode.connect(gainNode.gain)
-
-  
-  signalLfo.start(0.5)
+  signalLfo.start()
   signalLfo.stop(audioCtx.currentTime + playEndTime)
 
   gainNode.connect(tremoloGainNode)
   gainNode.connect(audioCtx.destination)
   
   signal.connect(gainNode)
-  if (!isiOS()){
-    signal.start(0.5)
-  }else{
-    signal.start(0.5)
-  }
+  signal.start()
+
   signal.stop(audioCtx.currentTime + playEndTime)
   if (!isiOS()){
     setTimeout(()  =>{ playVoiceSound() }, 2500)
@@ -188,7 +183,7 @@ function zetton(){
   start = true
   playSemiSound()
   if (!isiOS()){
-    voiceTimer = setInterval(() =>{playSignal()}, 3300)
+    voiceTimer = setInterval(() =>{playSignal()}, 4000)
   }else{
     playSemiSound()
     playSignal()
