@@ -95,55 +95,33 @@ function playVoiceSound(){
 
 
 function playSignal(){
-  let audioCtx = new AudioContext()
-  const gainNode = audioCtx.createGain()
-  gainNode.gain.value = 0.1
-
-  const signalLfo = audioCtx.createOscillator()
-  const depth = audioCtx.createGain()
-  depth.gain.value = 16
-  //signalLfo.rate = 0.5
-  //signalLfo.type = 'saw'
-  signalLfo.type = 'square'
-
-  const signal = audioCtx.createOscillator()
-  signal.type = "sine"
+  const audioCtx = new AudioContext();
+  const signal = audioCtx.createOscillator();
   signal.frequency.setValueAtTime(554.37, audioCtx.currentTime)
   signal.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + 1.5 )
-  signal.connect(gainNode).connect(audioCtx.destination)
-  signal.start(0.5)
-  signal.stop(audioCtx.currentTime + 1.6)
+  signal.type = 'sine'
 
-  signalLfo.frequency.value = 12
-  signalLfo.connect(depth).connect(signal.frequency)
-  signalLfo.start()
-  setTimeout(()  =>{ playVoiceSound() }, 2500)
-}
-
-function dev_playSignal(){
-  let audioCtx = new AudioContext()
   const gainNode = audioCtx.createGain()
-  gainNode.gain.value = 0.2
 
-  const lfo = audioCtx.createOscillator()
-  const depth = audioCtx.createGain()
-  depth.gain.value = 30
-  lfo.rate = 1.7
-  lfo.type = 'sine'
-  lfo.frequency.value = 12
+  const tremloSetting = {rate:11, depth: 0.5}
+  const tremoloValue = 1 - (tremloSetting.depth / 2)
+  const tremoloAmplitude = tremloSetting.depth / 2
+  gainNode.gain.setValueAtTime(1 - tremoloAmplitude, audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(tremoloValue, audioCtx.currentTime + 1 / tremloSetting.depth / 2);
 
-  let osc = audioCtx.createOscillator()
-  osc.type = "sine"
-  osc.frequency.setValueAtTime(554.37, audioCtx.currentTime)
-  osc.frequency.linearRampToValueAtTime(1046.50, audioCtx.currentTime + 1.2 )
-  osc.connect(gainNode).connect(audioCtx.destination)
+  const signalLfo = audioCtx.createOscillator()
+  signalLfo.frequency.value = tremloSetting.rate
+  signalLfo.type = 'square'
+  signalLfo.connect(gainNode.gain)
+  signalLfo.start()
 
-  osc.start();
-  osc.stop(audioCtx.currentTime + 1.2)
+  signal.connect(gainNode)
+  gainNode.connect(audioCtx.destination)
 
-  
-  lfo.connect(depth).connect(osc.frequency)
-  lfo.start()
+  signal.start(0.5)
+  signal.stop(audioCtx.currentTime + 1.9)
+
+  setTimeout(()  =>{ playVoiceSound() }, 2500)
 }
 
 
